@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bank File to CSV</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Inter", sans-serif;
+      background: linear-gradient(135deg, #f0f9ff, #e3f2fd, #fff1f0);
+      animation: bgShift 20s ease infinite alternate;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      padding: 60px 20px;
+      background-size: 400% 400%;
+    }
+
+    @keyframes bgShift {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
+    }
+
+    h1 {
+      font-size: 36px;
+      color: #1a1a1a;
+      text-align: center;
+      margin-bottom: 40px;
+      letter-spacing: -0.5px;
+    }
+
+    form {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(14px);
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      width: 100%;
+      max-width: 480px;
+      transition: all 0.3s ease-in-out;
+    }
+
+    input[type="file"] {
+      padding: 12px;
+      font-size: 15px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      width: 100%;
+      background: #f9f9f9;
+      transition: all 0.2s;
+    }
+
+    input[type="file"]:hover {
+      border-color: #888;
+    }
+
+    button, #downloadBtn {
+      padding: 12px 26px;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(to right, #00b4d8, #0077b6);
+      color: white;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    button:hover, #downloadBtn:hover {
+      background: linear-gradient(to right, #0096c7, #023e8a);
+      transform: translateY(-2px);
+    }
+
+    #result {
+      white-space: pre-wrap;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(6px);
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      margin-top: 40px;
+      width: 100%;
+      max-width: 800px;
+      font-size: 15px;
+      line-height: 1.6;
+      color: #222;
+    }
+
+    #downloadBtn {
+      display: none;
+      margin-top: 24px;
+    }
+
+    @media (max-width: 600px) {
+      form {
+        padding: 20px;
+      }
+      h1 {
+        font-size: 26px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>🚀 Convert Bank Files to CSV</h1>
+
+  <form id="uploadForm">
+    <input type="file" name="file" required />
+    <button type="submit">Convert Now</button>
+  </form>
+
+  <div id="result">📄 Upload a bank file (PDF, TXT, or Image)...</div>
+  <a id="downloadBtn" href="#" download="converted.csv">⬇️ Download CSV</a>
+
+  <script>
+    const form = document.getElementById("uploadForm");
+    const result = document.getElementById("result");
+    const downloadBtn = document.getElementById("downloadBtn");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const file = form.file.files[0];
+      const formData = new FormData();
+      formData.append("file", file);
+
+      result.textContent = "⏳ Uploading and converting...";
+      downloadBtn.style.display = "none";
+
+      try {
+        const response = await fetch("/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        const text = await response.text();
+        result.textContent = text;
+
+        const blob = new Blob([text], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+
+        downloadBtn.href = url;
+        downloadBtn.style.display = "inline-block";
+      } catch (err) {
+        console.error(err);
+        result.textContent = "❌ Something went wrong.";
+      }
+    });
+  </script>
+</body>
+</html>
